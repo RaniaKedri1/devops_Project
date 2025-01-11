@@ -1,7 +1,7 @@
 pipeline {
     agent any
     triggers {
-        pollSCM('H /5 * * * *')  // Polls GitHub repository every 5 minutes
+        pollSCM('H/5 * * * *')  // Poll GitHub repository every 5 minutes
     }
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // Your DockerHub credentials ID
@@ -12,7 +12,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:RaniaKedri1/devops_Project.git', credentialsId: 'GitHub_SSH'
+                // Clone the repository from GitHub
+                git branch: 'main', 
+                    url: 'git@github.com:RaniaKedri1/devops_Project.git', 
+                    credentialsId: 'GitHub_SSH'  // Ensure this matches the SSH credential ID
             }
         }
         stage('Build ShelterCareApp Image') {
@@ -26,16 +29,16 @@ pipeline {
         stage('Build MySQL Image') {
             steps {
                 script {
-                    // Build the Docker image for MySQL container
-                    dockerImageMysql = docker.build("${IMAGE_NAME_MYSQL}", 'mysql')
+                    // Build the Docker image for MySQL container using the `mysql` Dockerfile
+                    dockerImageMysql = docker.build("${IMAGE_NAME_MYSQL}", './mysql')  // Ensure the MySQL Dockerfile is in a subdirectory named 'mysql'
                 }
             }
         }
         stage('Build PHPMyAdmin Image') {
             steps {
                 script {
-                    // Build the Docker image for phpMyAdmin container
-                    dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PHPADMIN}", 'phpmyadmin')
+                    // Build the Docker image for phpMyAdmin container using the `phpmyadmin` Dockerfile
+                    dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PHPADMIN}", './phpmyadmin')  // Ensure the phpMyAdmin Dockerfile is in a subdirectory named 'phpmyadmin'
                 }
             }
         }
