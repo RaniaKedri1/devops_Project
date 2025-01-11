@@ -14,7 +14,7 @@ pipeline {
     }
 
     tools {
-        maven 'Maven 3' // Maven tool configured in Jenkins
+        maven 'Maven  3.9.9' // Use Maven tool labeled as "Maven 3.x" in Jenkins
     }
 
     stages {
