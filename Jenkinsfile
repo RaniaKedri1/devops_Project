@@ -1,107 +1,52 @@
 pipeline {
     agent any
-
     triggers {
-        pollSCM('H/5 * * * *') // Polling SCM every 5 minutes
+        pollSCM('H /5 * * * *')  // Polls GitHub repository every 5 minutes
     }
-
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // Docker Hub credentials
-        IMAGE_NAME_SHELTERCAREAPP = 'username/sheltercareapp'  // ShelterCareApp image
-        IMAGE_NAME_MYSQL = 'username/mysql'  // MySQL image
-        IMAGE_NAME_PHPADMIN = 'username/phpmyadmin'  // PHPMyAdmin image
-        GIT_SSH_CREDENTIALS = credentials('GitHub_SSH')  // SSH Key for GitHub access
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // Your DockerHub credentials ID
+        IMAGE_NAME_SHELTERCAREAPP = 'username/sheltercareapp'  // Replace 'username' with your Docker Hub username
+        IMAGE_NAME_MYSQL = 'username/mysql'  // Replace 'username' with your Docker Hub username
+        IMAGE_NAME_PHPADMIN = 'username/phpmyadmin'  // Replace 'username' with your Docker Hub username
     }
-
-    tools {
-        maven 'Maven  3.9.9' // Use Maven tool labeled as "Maven 3.x" in Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/RaniaKedri1/NewDevopsProject.git',
-                    credentialsId: 'GitHub_SSH' // GitHub SSH credentials
+                git branch: 'main', url: 'git@github.com:RaniaKedri1/devops_Project.git', credentialsId: 'GitHub_SSH'
             }
         }
-
         stage('Build ShelterCareApp Image') {
             steps {
-                dir('sheltercareapp') {
-                    script {
-                        dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}", '-f Dockerfile .')
-                    }
+                script {
+                    // Build the Docker image for your ShelterCareApp container
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
                 }
             }
         }
-
         stage('Build MySQL Image') {
             steps {
-                dir('mysql') {
-                    script {
-                        dockerImageMySQL = docker.build("${IMAGE_NAME_MYSQL}", '-f Dockerfile .')
-                    }
+                script {
+                    // Build the Docker image for MySQL container
+                    dockerImageMysql = docker.build("${IMAGE_NAME_MYSQL}", 'mysql')
                 }
             }
         }
-
         stage('Build PHPMyAdmin Image') {
             steps {
-                dir('phpmyadmin') {
-                    script {
-                        dockerImagePHPAdmin = docker.build("${IMAGE_NAME_PHPADMIN}", '-f Dockerfile .')
-                    }
-                }
-            }
-        }
-
-        stage('Scan ShelterCareApp Image') {
-            steps {
                 script {
-                    sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                    aquasec/trivy:latest image \
-                    --severity LOW,MEDIUM,HIGH,CRITICAL \
-                    ${IMAGE_NAME_SHELTERCAREAPP}
-                    """
+                    // Build the Docker image for phpMyAdmin container
+                    dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PHPADMIN}", 'phpmyadmin')
                 }
             }
         }
-
-        stage('Scan MySQL Image') {
-            steps {
-                script {
-                    sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                    aquasec/trivy:latest image \
-                    --severity LOW,MEDIUM,HIGH,CRITICAL \
-                    ${IMAGE_NAME_MYSQL}
-                    """
-                }
-            }
-        }
-
-        stage('Scan PHPMyAdmin Image') {
-            steps {
-                script {
-                    sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                    aquasec/trivy:latest image \
-                    --severity LOW,MEDIUM,HIGH,CRITICAL \
-                    ${IMAGE_NAME_PHPADMIN}
-                    """
-                }
-            }
-        }
-
         stage('Push Images to Docker Hub') {
             steps {
                 script {
                     docker.withRegistry('', "${DOCKERHUB_CREDENTIALS}") {
+                        // Push images to Docker Hub
                         dockerImageSheltercareapp.push()
-                        dockerImageMySQL.push()
-                        dockerImagePHPAdmin.push()
+                        dockerImageMysql.push()
+                        dockerImagePhpmyadmin.push()
                     }
                 }
             }
