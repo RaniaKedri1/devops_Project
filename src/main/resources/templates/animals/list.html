@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Animal List</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container my-5">
+  <h1 class="text-center mb-4">Animal List</h1>
+
+
+  <!-- Search Form -->
+  <!-- Search Form -->
+  <form th:action="@{/templates/t/animals}" method="get" class="d-flex mb-4">
+    <input type="text" class="form-control me-2" name="mc" placeholder="Search by name" th:value="${mc}">
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>
+
+  <!-- Animal Table -->
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Species</th>
+      <th>Breed</th>
+      <th>Gender</th>
+      <th>Age</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="animal : ${animals}">
+      <td th:text="${animal.id}"></td>
+      <td th:text="${animal.name}"></td>
+      <td th:text="${animal.species}"></td>
+      <td th:text="${animal.breed}"></td>
+      <td th:text="${animal.gender}"></td>
+      <td th:text="${animal.age}"></td>
+<!--      <td th:text="${animal.status}"></td>-->
+      <td>
+        <!-- Use the color from the AnimalStatus enum -->
+        <span th:class="${animal.status.getColor()}"
+              th:text="${animal.status}"></span>
+      </td>
+      <td>
+        <a th:href="@{/templates/t/templates/edit/{id}(id=${animal.id})}" class="btn btn-warning btn-sm">Edit</a>
+        <a th:href="@{/templates/t/templates/delete/{id}(id=${animal.id})}"
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Are you sure?')">Delete</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div class="card-footer">
+    <div class="text-center">
+      <ul class="nav nav-pills d-inline-flex">
+        <li th:each="i, c : ${#numbers.sequence(1, totalPages)}">
+          <a th:href="@{/templates/t/templates(mc=${mc}, page=${i}, size=${5})}"
+             th:text="${i}"
+             th:class="${i == currentPage ? 'btn btn-primary mx-2' : 'btn btn-outline-primary mx-2'}"></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- Add New Animal -->
+  <div class="text-center mt-3">
+    <a href="/animals/add" class="btn btn-success">Add New Animal</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

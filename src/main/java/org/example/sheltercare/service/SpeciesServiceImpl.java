@@ -1,0 +1,4 @@
+package org.example.sheltercare.service;
+
+public class SpeciesServiceImpl {
+}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Medical Record</title>
+</head>
+<body>
+<h1>Edit Medical Record</h1>
+<form action="#" th:action="@{/animals/medical-records/edit/{id}(id=${medicalRecord.id})}" th:object="${medicalRecord}" method="post">
+    <label for="description">Description:</label>
+    <input type="text" id="description" th:field="*{description}" required />
+    <br />
+    <label for="date">Date:</label>
+    <input type="date" id="date" th:field="*{date}" required />
+    <br />
+    <label for="animal">Animal:</label>
+    <input type="text" id="animal" th:field="*{animal.name}" readonly />
+    <br />
+    <button type="submit">Update</button>
+</form>
+<a href="/animals">Back to Animals</a>
+</body>
+</html>
