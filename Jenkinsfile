@@ -8,6 +8,7 @@ pipeline {
         IMAGE_NAME_SHELTERCAREAPP = 'username/sheltercareapp' // Replace 'username' with your Docker Hub username
         IMAGE_NAME_MYSQL = 'username/mysql' // Replace 'username' with your Docker Hub username
         IMAGE_NAME_PHPADMIN = 'username/phpmyadmin' // Replace 'username' with your Docker Hub username
+        GIT_SSH_COMMAND = 'ssh -i /var/jenkins_home/.ssh/id_rsa -o StrictHostKeyChecking=no' // Ensure the right SSH key is used
     }
     stages {
         stage('Checkout') {
