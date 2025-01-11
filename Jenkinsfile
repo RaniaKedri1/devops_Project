@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:RaniaKedri1/devops_Project.git', credentialsId: 'GitHub_SSH'
+                git branch: 'main', url: 'https://github.com/RaniaKedri1/NewDevopsProject.git', credentialsId: 'GitHub_SSH'
             }
         }
         stage('Build ShelterCareApp Image') {
