@@ -61,7 +61,7 @@
         <div class="col-md-4" th:each="animal : ${animals}">
             <div class="card mb-4 animal-card">
                 <!-- Animal Image -->
-                <img th:src="@{/images/animals.jpg}" class="card-img-top animal-image" alt="Animal Image"> <!-- Replace with dynamic image if needed -->
+                <img th:src="@{/images/animals.jpg}" class="card-img-top animal-image" alt="Animal Image">
                 <div class="card-body">
                     <h5 class="card-title" th:text="${animal.name}"></h5>
                     <p class="card-text"><strong>Species:</strong> <span th:text="${animal.spe?.nom}"></span></p>

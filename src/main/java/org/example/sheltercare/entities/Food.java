@@ -6,23 +6,38 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Volunteer
+public class Food
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     private String name;
-    private String contactInfo;  // Contact information of the volunteer
 
-    @ManyToMany(mappedBy = "volunteers")
-    private List<Animal> animals;  // Set of animals that the volunteer cares for
+    @ManyToMany(mappedBy = "foods")
+    private List<Animal> animals = new ArrayList<>();
 
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

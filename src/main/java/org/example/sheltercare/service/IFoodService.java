@@ -4,8 +4,12 @@ import org.example.sheltercare.entities.Food;
 
 import java.util.List;
 
-public interface IVolunteerService {
-    public Food saveVolunteer(Food volunteer);
-    public List<Food> getAllVolunteers();
-    public void deleteVolunteer(Long id);
+public interface IFoodService {
+    public Food saveFood(Food food);
+
+    public List<Food> getAllFoods();
+
+    public Food getFoodById(Long id);
+
+    public void deleteFood(Long id);
 }

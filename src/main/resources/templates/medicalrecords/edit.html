@@ -8,7 +8,7 @@
 <div class="container my-5">
     <h1 class="text-center mb-4">Edit Medical Record</h1>
 
-    <form th:action="@{/admin/medicalrecords/update/{id}(id=${medicalRecord.id})}"
+    <form th:action="@{/medicalrecords/update/{id}(id=${medicalRecord.id})}"
           method="post" th:object="${medicalRecord}">
 
         <!-- Animal Name (Non-Editable) -->
@@ -38,7 +38,7 @@
         <!-- Submit and Back Buttons -->
         <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Update</button>
-            <a th:href="@{/admin/medicalrecords}" class="btn btn-secondary">Back to List</a>
+            <a th:href="@{/medicalrecords}" class="btn btn-secondary">Back to List</a>
         </div>
     </form>
 </div>

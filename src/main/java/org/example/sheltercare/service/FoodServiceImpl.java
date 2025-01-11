@@ -9,20 +9,26 @@ import java.util.List;
 
 @AllArgsConstructor
 @Service
-public class VolunteerServiceImpl implements IFoodService {
-    private FoodRepo volunteerRepo;
+public class FoodServiceImpl implements IFoodService {
+    private FoodRepo foodRepo;
+
     @Override
-    public Food saveVolunteer(Food volunteer) {
-        return volunteerRepo.save(volunteer);
+    public Food saveFood(Food food) {
+        return foodRepo.save(food);
     }
 
     @Override
-    public List<Food> getAllVolunteers() {
-        return volunteerRepo.findAll();
+    public List<Food> getAllFoods() {
+        return foodRepo.findAll();
     }
 
     @Override
-    public void deleteVolunteer(Long id) {
-        volunteerRepo.deleteById(id);
+    public Food getFoodById(Long id) {
+        return foodRepo.findById(id).orElseThrow(() -> new RuntimeException("Food not found"));
+    }
+
+    @Override
+    public void deleteFood(Long id) {
+        foodRepo.deleteById(id);
     }
 }

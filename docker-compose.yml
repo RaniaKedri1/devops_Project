@@ -1,0 +1,47 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: shelterManage
+    ports:
+      - "3306:3306"  # Expose MySQL for local testing if needed
+    volumes:
+      - mysql-data:/var/lib/mysql  # Ensure data persistence
+    networks:
+      - sheltercare-network
+
+  sheltercareapp:
+    build:
+      context: .  # Dockerfile context, assuming your Spring Boot app has a Dockerfile
+    container_name: sheltercareapp
+    ports:
+      - "8080:8080"  # Expose Spring Boot app on port 8080
+    networks:
+      - sheltercare-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/shelterManage?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"  # Access phpMyAdmin at http://localhost:8081
+    networks:
+      - sheltercare-network
+
+networks:
+  sheltercare-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

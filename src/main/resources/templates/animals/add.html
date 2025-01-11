@@ -8,15 +8,20 @@
 <div class="container my-5">
   <h1 class="text-center mb-4">Add New Animal</h1>
 
-  <form th:action="@{/templates/t/templates/save}" method="post" >
+  <form th:action="@{/animals/save}" method="post" >
     <div class="mb-3">
       <label for="name" class="form-label">Name:</label>
       <input type="text" id="name" name="name" class="form-control" required>
     </div>
-
     <div class="mb-3">
-      <label for="species" class="form-label">Species:</label>
-      <input type="text" id="species" name="species" class="form-control" required>
+      <label for="species" class="form-label">Species</label>
+      <select id="species" name="speciesId" class="form-select">
+        <option value="">Choose a specie</option>
+        <option th:each="species : ${speciesList}"
+                th:value="${species.id}"
+                th:text="${species.nom}"
+                th:selected="${species.id == animal.spe?.id}">Species</option>
+      </select>
     </div>
 
     <div class="mb-3">
@@ -45,6 +50,28 @@
         <option value="IN_CARE">In Care</option>
       </select>
     </div>
+
+
+
+    <!-- Food Selection -->
+    <div class="mb-3">
+      <label class="form-label">Select Food (Select at least one)</label>
+      <div class="form-check" th:each="food : ${foodList}">
+        <input type="checkbox"
+               class="form-check-input"
+               th:id="'food' + ${food.id}"
+               th:value="${food.id}"
+               name="foodIds"
+               th:checked="${#lists.contains(animal.foods.![id], food.id)}"
+
+               onchange="validateFoodSelection()">
+        <label class="form-check-label" th:for="'food' + ${food.id}" th:text="${food.name}"></label>
+      </div>
+      <div id="foodError" class="invalid-feedback" style="display: none;">
+        Please select at least one food.
+      </div>
+    </div>
+
 
     <button type="submit" class="btn btn-primary">Save</button>
     <a href="/animals" class="btn btn-secondary">Back to List</a>

@@ -10,7 +10,7 @@
   <h1 class="text-center mb-4">Medical Records</h1>
 
   <!-- Button to Add New Medical Record -->
-  <a th:href="@{/admin/medicalrecords/add}" class="btn btn-success mb-3">Add New Medical Record</a>
+  <a th:href="@{/medicalrecords/add}" class="btn btn-success mb-3">Add New Medical Record</a>
 
   <!-- Table to display medical records -->
   <table class="table table-striped table-bordered">
@@ -31,13 +31,13 @@
       <td th:text="${record.treatmentDate}"></td>
       <td>
         <!-- Edit button -->
-        <a th:href="@{/admin/medicalrecords/edit/{id}(id=${record.id})}" class="btn btn-primary btn-sm">Edit</a>
+        <a th:href="@{/medicalrecords/edit/{id}(id=${record.id})}" class="btn btn-primary btn-sm">Edit</a>
       </td>
     </tr>
 
     </tbody>
   </table>
-  <a th:href="@{/admin/animals}" class="btn btn-secondary">Back to List</a>
+  <a th:href="@{/animals}" class="btn btn-secondary">Back to List</a>
 
 </div>
 

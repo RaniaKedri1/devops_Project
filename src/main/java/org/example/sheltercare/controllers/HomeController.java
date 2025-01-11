@@ -11,12 +11,18 @@ import java.util.List;
 @Controller
 public class HomeController {
 
-    private IAnimalService animalService;
+    private final IAnimalService animalService;
 
+    // Constructor-based dependency injection
+    public HomeController(IAnimalService animalService) {
+        this.animalService = animalService;
+    }
     @GetMapping("/")
     public String showHomePage(Model model) {
         List<Animal> allAnimals = animalService.getAllAnimals();
-        model.addAttribute("animals", allAnimals);  // Pass animals to the view
-        return "animals";   // Return to the home page template (Animals.html)
+        System.out.println("Animals: " + allAnimals);  // Logs the animals list
+        model.addAttribute("animals", allAnimals);
+        return "animals";
     }
+
 }
