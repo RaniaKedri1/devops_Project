@@ -24,15 +24,27 @@ pipeline {
             }
         }
 
-        stage('Build Sheltercare App Image') {
+       /* stage('Build Sheltercare App Image') {
             steps {
                 script {
                     // Building Docker image for sheltercare app
                     dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
                 }
             }
+        }*/
+            stage('Build Sheltercare Image') {
+            steps {
+                script {
+                    // Verifying the existence of Dockerfile and building Docker image
+                    def dockerfilePath = 'Dockerfile'
+                    if (fileExists(dockerfilePath)) {
+                        dockerImage = docker.build("${IMAGE_NAME_SHELTERCAREAPP}", "-f ${dockerfilePath} .")
+                    } else {
+                        error "Dockerfile not found in the project root directory"
+                    }
+                }
+            }
         }
-
         stage('Scan Sheltercare App Image') {
             steps {
                 script {
