@@ -6,7 +6,7 @@ pipeline {
     }
 
     tools {
-        maven 'Maven 3.x' // Use the name you provided in Global Tool Configuration
+        maven 'Maven 3.9.9' // Use the name you provided in Global Tool Configuration
     }
 
     environment {
