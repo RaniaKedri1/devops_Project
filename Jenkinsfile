@@ -1,10 +1,19 @@
 pipeline {
     agent any
 
+    triggers {
+        pollSCM('H/5 * * * *') // Polling SCM every 5 minutes
+    }
+
+    tools {
+        maven 'Maven 3.x' // Use the name you provided in Global Tool Configuration
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME_PREFIX = 'raniakedri22/'  // Your DockerHub username
         IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"  // Image name for sheltercare app
+        JAR_PATH = 'C:/Users/kedri/IdeaProjects/DockershelterCare/target/shelterCareApp.jar' // Path to the pre-built JAR file
     }
 
     stages {
@@ -19,8 +28,7 @@ pipeline {
                 }
             }
         }
-
-        stage('Build JAR') {
+     stage('Build JAR') {
             steps {
                 script {
                     // Build the application and create JAR file
@@ -40,13 +48,14 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Build Docker Image') {
             steps {
                 script {
                     // Verifying the existence of Dockerfile and building Docker image
                     def dockerfilePath = 'Dockerfile'
                     if (fileExists(dockerfilePath)) {
+                        // Use the pre-built JAR file in the Docker build context
                         dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}", "-f ${dockerfilePath} .")
                     } else {
                         error "Dockerfile not found in the project root directory"
