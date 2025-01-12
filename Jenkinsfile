@@ -28,7 +28,7 @@ pipeline {
             }
         }
 
-        stage('Build JAR') {
+        /*stage('Build JAR') {
             steps {
                 script {
                     // Build the application and create JAR file
@@ -44,7 +44,7 @@ pipeline {
                     sh 'ls -l target/'  // Listing files in the target directory
                 }
             }
-        }
+        }*//
 
         stage('Build Docker Image') {
             steps {
