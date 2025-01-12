@@ -14,7 +14,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', 
-                    url: 'git@github.com:RaniaKedri1/devops_Project.git', 
+                    url: 'https://github.com/RaniaKedri1/devops_Project', 
                     credentialsId: 'GitHub_SSH'
                 script {
                     VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
