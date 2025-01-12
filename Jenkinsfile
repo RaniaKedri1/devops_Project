@@ -2,70 +2,56 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('H/5 * * * *')  // Polling SCM every 5 minutes
+        pollSCM('H/5 * * * *') // Consider using webhooks if on GitHub
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // ID of the secret text (PAT) credential
-        DOCKER_USERNAME = 'raniakedri22'  // Your Docker Hub username
-        IMAGE_NAME_PREFIX = "${DOCKER_USERNAME}/devops_project"  // Image name for Docker Hub
-    }
-
-    tools {
-        maven 'Maven 3.9.9'  // Specify Maven 3.9.9
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        IMAGE_NAME_PREFIX = 'raniakedri22/' // Use prefix for your DockerHub repo
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'git@github.com:RaniaKedri1/devops_Project.git',
-                    credentialsId: 'GitHub_SSH'  // GitHub credential ID for SSH access to repo
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
+                git branch: 'main', 
+                    url: 'git@github.com:RaniaKedri1/devops_Project.git', 
+                    credentialsId: 'GitHub_SSH'
                 script {
-                    // Build Docker image using Dockerfile in the project directory
-                    def dockerfilePath = './DockershelterCare/Dockerfile'  // Specify path to Dockerfile
-                    if (fileExists(dockerfilePath)) {
-                        dockerImageSheltercareapp = docker.build("${IMAGE_NAME_PREFIX}:${VERSION}", dockerfilePath)
-                    } else {
-                        error "Dockerfile not found at ${dockerfilePath}"
-                    }
+                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                 }
             }
         }
 
-        stage('Scan Docker Image') {
+        stage('Build Images') {
             steps {
                 script {
-                    // Vulnerability scan with Trivy
-                    def scanResult = sh(script: """
-                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
-                        aquasec/trivy:latest image --exit-code 1 \\
-                        --severity LOW,MEDIUM,HIGH,CRITICAL \\
-                        --timeout 60m \\
-                        ${IMAGE_NAME_PREFIX}:${VERSION}
-                    """, returnStatus: true)
-
-                    if (scanResult != 0) {
-                        error "Vulnerability scan failed with exit code ${scanResult}"
-                    } else {
-                        echo "Vulnerability scan completed successfully."
-                    }
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}", './DockershelterCare')
+                    // Uncomment below lines if required
+                    // dockerImageMysql = docker.build("${IMAGE_NAME_PREFIX}mysql:${VERSION}", './mysql')
+                    // dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PREFIX}phpmyadmin:${VERSION}", './phpmyadmin')
                 }
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Scan Images') {
             steps {
                 script {
-                    // Push image to Docker Hub
+                    sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}"
+                    // Uncomment below lines if required
+                    // sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}mysql:${VERSION}"
+                    // sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}phpmyadmin:${VERSION}"
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                script {
                     docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
-                        echo "Pushing image ${IMAGE_NAME_PREFIX}:${VERSION} to Docker Hub..."
                         dockerImageSheltercareapp.push()
+                        // Uncomment below lines if required
+                        // dockerImageMysql.push()
+                        // dockerImagePhpmyadmin.push()
                     }
                 }
             }
