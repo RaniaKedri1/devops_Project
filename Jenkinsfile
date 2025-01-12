@@ -1,60 +1,88 @@
 pipeline {
     agent any
+
     triggers {
-        pollSCM('H/5 * * * *') // Consider using webhooks if on GitHub
+        pollSCM('H/5 * * * *') // Polling SCM every 5 minutes
     }
+
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-        IMAGE_NAME_PREFIX = 'raniakedri22/' // Use prefix for your DockerHub repo
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // DockerHub credentials
+        IMAGE_NAME_PREFIX = 'raniakedri22/'  // Your DockerHub username
+        IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"  // Image name for sheltercare app
+        // Add more image names for other services if necessary
     }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/RaniaKedri1/devops_Project', credentialsId: 'GitHub_SSH'
+                git branch: 'main',
+                    url: 'https://github.com/RaniaKedri1/devops_Project',
+                    credentialsId: 'GitHub_SSH'  // GitHub SSH credentials
                 script {
-                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()  // Get short git hash as version
                 }
             }
         }
-        stage('Build Images') {
-            steps {
-                script {
-                    try {
-                        //Corrected line:
-                        dockerImageSheltercareapp = docker.build("${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}", './DockershelterCare', '-f ./DockershelterCare/Dockerfile')
-                        // ... (rest of your build commands, still commented out) ...
-                    } catch (Exception e) {
-                        error("Image build failed: ${e.message}")
-                        currentBuild.result = 'FAILURE'
-                        return
-                    }
-                }
-            }
-        }
-        stage('Scan Images') {
-            steps {
-                script {
-                    try{
-                        sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}"
-                        // ... (rest of your scan commands, still commented out) ...
-                    } catch (Exception e) {
-                        error("Trivy scan failed: ${e.message}")
-                        currentBuild.result = 'FAILURE'
-                        return
-                    }
 
+        stage('Build Sheltercare App Image') {
+            steps {
+                script {
+                    // Building Docker image for sheltercare app
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}", './DockershelterCare')
                 }
             }
         }
-        stage('Push Images') {
+
+        stage('Scan Sheltercare App Image') {
             steps {
                 script {
+                    // Run Trivy scan for vulnerabilities
+                    sh """
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
+                        aquasec/trivy:latest image --exit-code 1 \\
+                        --severity LOW,MEDIUM,HIGH,CRITICAL \\
+                        --timeout 60m \\
+                        ${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}
+                    """
+                }
+            }
+        }
+
+        stage('Push Sheltercare App Image to Docker Hub') {
+            steps {
+                script {
+                    // Push Sheltercare app image to Docker Hub
                     docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
                         dockerImageSheltercareapp.push()
-                        // ... (rest of your push commands, still commented out) ...
                     }
                 }
             }
         }
+
+        // Add similar stages for other images if required (like MySQL, PhpMyAdmin)
+        // For example:
+        // stage('Build Mysql Image') {
+        //     steps {
+        //         script {
+        //             dockerImageMysql = docker.build("${IMAGE_NAME_PREFIX}mysql:${VERSION}", './mysql')
+        //         }
+        //     }
+        // }
+        // stage('Scan Mysql Image') {
+        //     steps {
+        //         script {
+        //             sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}mysql:${VERSION}"
+        //         }
+        //     }
+        // }
+        // stage('Push Mysql Image to Docker Hub') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
+        //                 dockerImageMysql.push()
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
