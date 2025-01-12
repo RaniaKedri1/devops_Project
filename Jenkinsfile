@@ -1,52 +1,57 @@
 pipeline {
     agent any
+
     triggers {
-        pollSCM('H /5 * * * *')  // Polls GitHub repository every 5 minutes
+        pollSCM('H/5 * * * *') // Consider using webhooks if on GitHub
     }
+
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // Your DockerHub credentials ID
-        IMAGE_NAME_SHELTERCAREAPP = 'username/sheltercareapp'  // Replace 'username' with your Docker Hub username
-        IMAGE_NAME_MYSQL = 'username/mysql'  // Replace 'username' with your Docker Hub username
-        IMAGE_NAME_PHPADMIN = 'username/phpmyadmin'  // Replace 'username' with your Docker Hub username
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        IMAGE_NAME_PREFIX = 'raniakedri22/' // Use prefix for your DockerHub repo
     }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:RaniaKedri1/devops_Project.git', credentialsId: 'GitHub_SSH'
-            }
-        }
-        stage('Build ShelterCareApp Image') {
-            steps {
+                git branch: 'main', 
+                    url: 'git@github.com:RaniaKedri1/devops_Project.git', 
+                    credentialsId: 'GitHub_SSH'
                 script {
-                    // Build the Docker image for your ShelterCareApp container
-                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
+                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                 }
             }
         }
-        stage('Build MySQL Image') {
+
+        stage('Build Images') {
             steps {
                 script {
-                    // Build the Docker image for MySQL container
-                    dockerImageMysql = docker.build("${IMAGE_NAME_MYSQL}", 'mysql')
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}", './DockershelterCare')
+                    // Uncomment below lines if required
+                    // dockerImageMysql = docker.build("${IMAGE_NAME_PREFIX}mysql:${VERSION}", './mysql')
+                    // dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PREFIX}phpmyadmin:${VERSION}", './phpmyadmin')
                 }
             }
         }
-        stage('Build PHPMyAdmin Image') {
+
+        stage('Scan Images') {
             steps {
                 script {
-                    // Build the Docker image for phpMyAdmin container
-                    dockerImagePhpmyadmin = docker.build("${IMAGE_NAME_PHPADMIN}", 'phpmyadmin')
+                    sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}sheltercareapp:${VERSION}"
+                    // Uncomment below lines if required
+                    // sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}mysql:${VERSION}"
+                    // sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}phpmyadmin:${VERSION}"
                 }
             }
         }
-        stage('Push Images to Docker Hub') {
+
+        stage('Push Images') {
             steps {
                 script {
-                    docker.withRegistry('', "${DOCKERHUB_CREDENTIALS}") {
-                        // Push images to Docker Hub
+                    docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
                         dockerImageSheltercareapp.push()
-                        dockerImageMysql.push()
-                        dockerImagePhpmyadmin.push()
+                        // Uncomment below lines if required
+                        // dockerImageMysql.push()
+                        // dockerImagePhpmyadmin.push()
                     }
                 }
             }
