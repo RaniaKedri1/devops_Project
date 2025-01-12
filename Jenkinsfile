@@ -6,10 +6,9 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // DockerHub credentials
-        IMAGE_NAME_PREFIX = 'raniakedri22/'  // Your DockerHub username
-        IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"  // Image name for sheltercare app
-        // Add more image names for other services if necessary
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        IMAGE_NAME_PREFIX = 'raniakedri22/'
+        IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"
     }
 
     stages {
@@ -17,34 +16,31 @@ pipeline {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/RaniaKedri1/devops_Project',
-                    credentialsId: 'GitHub_SSH'  // GitHub SSH credentials
+                    credentialsId: 'GitHub_SSH'
                 script {
-                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()  // Get short git hash as version
+                    VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                 }
             }
         }
 
-       /* stage('Build Sheltercare App Image') {
+        stage('Build Sheltercare App') {
             steps {
                 script {
-                    // Building Docker image for sheltercare app
-                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
-                }
-            }
-        }*/
-            stage('Build Sheltercare Image') {
-            steps {
-                script {
-                    // Verifying the existence of Dockerfile and building Docker image
-                    def dockerfilePath = 'Dockerfile'
-                    if (fileExists(dockerfilePath)) {
-                        dockerImage = docker.build("${IMAGE_NAME_SHELTERCAREAPP}", "-f ${dockerfilePath} .")
-                    } else {
-                        error "Dockerfile not found in the project root directory"
-                    }
+                    // Build the application and create JAR file
+                    sh 'mvn clean package'  // Ensure Maven is set up correctly in Jenkins
                 }
             }
         }
+
+        stage('Build Sheltercare App Image') {
+            steps {
+                script {
+                    // Build Docker image using the context of the current directory
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
+                }
+            }
+        }
+
         stage('Scan Sheltercare App Image') {
             steps {
                 script {
@@ -70,31 +66,5 @@ pipeline {
                 }
             }
         }
-
-        // Add similar stages for other images if required (like MySQL, PhpMyAdmin)
-        // For example:
-        // stage('Build Mysql Image') {
-        //     steps {
-        //         script {
-        //             dockerImageMysql = docker.build("${IMAGE_NAME_PREFIX}mysql:${VERSION}", './mysql')
-        //         }
-        //     }
-        // }
-        // stage('Scan Mysql Image') {
-        //     steps {
-        //         script {
-        //             sh "trivy image --severity MEDIUM ${IMAGE_NAME_PREFIX}mysql:${VERSION}"
-        //         }
-        //     }
-        // }
-        // stage('Push Mysql Image to Docker Hub') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
-        //                 dockerImageMysql.push()
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
