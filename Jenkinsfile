@@ -5,6 +5,10 @@ pipeline {
         pollSCM('H/5 * * * *') // Polling SCM every 5 minutes
     }
 
+    tools {
+        maven 'Maven 3.x' // Use the name you provided in Global Tool Configuration
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME_PREFIX = 'raniakedri22/'
