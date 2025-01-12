@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Building Docker image for sheltercare app
-                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}", './DockershelterCare')
+                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
                 }
             }
         }
