@@ -27,6 +27,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
     depends_on:
       - mysql
+    volumes:
+      - C:/Users/kedri/.ssh/id_rsa:/root/.ssh/id_rsa:ro  # Mount private key
+      - C:/Users/kedri/.ssh/known_hosts:/root/.ssh/known_hosts:ro  # Mount known_hosts file
+
+
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
