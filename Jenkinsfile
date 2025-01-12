@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('Build Sheltercare App') {
+        stage('Build jar') {
             steps {
                 script {
                     // Build the application and create JAR file
@@ -35,37 +35,57 @@ pipeline {
                 }
             }
         }
-
-        stage('Build Sheltercare App Image') {
+        stage('Check Jar') {
             steps {
                 script {
-                    // Build Docker image using the context of the current directory
-                    dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}")
+                    // Verifying the presence of the JAR file
+                    sh 'ls -l target/'  // Listing files in the target directory
+                }
+            }
+        }
+   
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Verifying the existence of Dockerfile and building Docker image
+                    def dockerfilePath = 'Dockerfile'
+                    if (fileExists(dockerfilePath)) {
+                        dockerImageSheltercareapp = docker.build("${IMAGE_NAME_SHELTERCAREAPP}", "-f ${dockerfilePath} .")
+                    } else {
+                        error "Dockerfile not found in the project root directory"
+                    }
                 }
             }
         }
 
-        stage('Scan Sheltercare App Image') {
+        stage('Scan Docker Image') {
             steps {
                 script {
-                    // Run Trivy scan for vulnerabilities
-                    sh """
+                    // Scan the Docker image with Trivy
+                    def scanResult = sh(script: """
                         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
                         aquasec/trivy:latest image --exit-code 1 \\
                         --severity LOW,MEDIUM,HIGH,CRITICAL \\
                         --timeout 60m \\
                         ${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}
-                    """
+                    """, returnStatus: true)
+
+                    if (scanResult != 0) {
+                        error "Vulnerability scan failed with exit code ${scanResult}"
+                    } else {
+                        echo "Vulnerability scan completed successfully."
+                    }
                 }
             }
         }
 
-        stage('Push Sheltercare App Image to Docker Hub') {
+        stage('Push Image to Docker Hub') {
             steps {
                 script {
-                    // Push Sheltercare app image to Docker Hub
+                    // Using Docker Hub credentials (PAT) to authenticate and push the image
                     docker.withRegistry('', DOCKERHUB_CREDENTIALS) {
-                        dockerImageSheltercareapp.push()
+                        echo "Pushing image ${IMAGE_NAME_SHELTERCAREAPP} to Docker Hub..."
+                        dockerImageSheltercareapp.push() // Pushing the image
                     }
                 }
             }
