@@ -10,10 +10,11 @@ pipeline {
     }
 
     environment {
+        
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME_PREFIX = 'raniakedri22/'  // Your DockerHub username
         IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"  // Image name for sheltercare app
-        JAR_PATH = 'C:/Users/kedri/IdeaProjects/DockershelterCare/target/shelterCareApp.jar' // Path to the pre-built JAR file
+        JAR_PATH = 'target/shelterCareApp.jar'
     }
 
     stages {
@@ -48,7 +49,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 script {

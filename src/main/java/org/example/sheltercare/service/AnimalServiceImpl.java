@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @AllArgsConstructor
-@Service
+@service
 public class AnimalServiceImpl  implements IAnimalService {
     private AnimalRepo animalRepo;
     @Override

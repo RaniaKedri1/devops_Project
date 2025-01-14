@@ -1,0 +1,27 @@
+#sheltercare-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sheltercare
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sheltercare
+  template:
+    metadata:
+      labels:
+        app: sheltercare
+    spec:
+      containers:
+      - name: sheltercare
+        image: raniakedri22/sheltercare:sheltercareapp
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://mysql:3306/shelterManage?createDatabaseIfNotExist=true
+        - name: SPRING_DATASOURCE_USERNAME
+          value: root
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: root
