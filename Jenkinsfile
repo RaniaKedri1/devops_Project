@@ -10,11 +10,10 @@ pipeline {
     }
 
     environment {
-        
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME_PREFIX = 'raniakedri22/'  // Your DockerHub username
         IMAGE_NAME_SHELTERCAREAPP = "${IMAGE_NAME_PREFIX}sheltercareapp"  // Image name for sheltercare app
-        JAR_PATH = 'target/shelterCareApp.jar'
+        JAR_PATH = 'target/shelterCareApp.jar' // Path to the JAR file
     }
 
     stages {
@@ -26,6 +25,18 @@ pipeline {
                 script {
                     // Get the short commit hash for versioning
                     VERSION = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                }
+            }
+        }
+
+        stage('Verify JAR File Exists') {
+            steps {
+                script {
+                    // Verify if the JAR file exists in the target directory
+                    def jarExists = fileExists("${WORKSPACE}/target/shelterCareApp.jar")
+                    if (!jarExists) {
+                        error "shelterCareApp.jar not found in target directory."
+                    }
                 }
             }
         }
