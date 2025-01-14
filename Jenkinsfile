@@ -29,11 +29,20 @@ pipeline {
             }
         }
 
+        stage('Build JAR File') {
+            steps {
+                script {
+                    // Build the JAR file using Maven
+                    sh 'mvn clean install -DskipTests'
+                }
+            }
+        }
+
         stage('Verify JAR File Exists') {
             steps {
                 script {
                     // Verify if the JAR file exists in the target directory
-                    def jarExists = fileExists("${WORKSPACE}/target/shelterCareApp.jar")
+                    def jarExists = fileExists("${WORKSPACE}/${JAR_PATH}")
                     if (!jarExists) {
                         error "shelterCareApp.jar not found in target directory."
                     }
@@ -61,10 +70,10 @@ pipeline {
                 script {
                     // Scan the Docker image with Trivy
                     def scanResult = sh(script: """
-                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
-                        aquasec/trivy:latest image --exit-code 1 \\
-                        --severity LOW,MEDIUM,HIGH,CRITICAL \\
-                        --timeout 60m \\
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\ 
+                        aquasec/trivy:latest image --exit-code 1 \\ 
+                        --severity LOW,MEDIUM,HIGH,CRITICAL \\ 
+                        --timeout 60m \\ 
                         ${IMAGE_NAME_SHELTERCAREAPP}:${VERSION}
                     """, returnStatus: true)
 
