@@ -29,26 +29,6 @@ pipeline {
                 }
             }
         }
-     stage('Build JAR') {
-            steps {
-                script {
-                    // Build the application and create JAR file
-                    sh 'mvn clean package -DskipTests'  // Ensure Maven is set up correctly in Jenkins
-                }
-            }
-        }
-
-        stage('Check JAR') {
-            steps {
-                script {
-                    // Verifying the presence of the JAR file in the Jenkins workspace
-                    if (!fileExists('target/shelterCareApp.jar')) {
-                        error "JAR file not found in target directory."
-                    }
-                    echo "JAR file found."
-                }
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
