@@ -121,4 +121,3 @@ To monitor the status of the Kubernetes pods running the application and related
 ```bash
 kubectl get pods -n monitoring
 
-![mon](https://github.com/user-attachments/assets/6f7fee66-2e2a-4272-a27a-a2785785716c)
