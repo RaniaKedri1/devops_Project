@@ -1,4 +1,5 @@
 #mysql-deployment.yaml
+#C:\Users\kedri\IdeaProjects\DockershelterCare\sheltercare-k8s\mysql-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
